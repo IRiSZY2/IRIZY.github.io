@@ -1,0 +1,403 @@
+/* ==========================================================================
+   VARIABLES & THEME CONTROL (ปรับแก้ Dropdown + Dark Theme สบายตาตาม iOS)
+   ========================================================================== */
+:root {
+    --bg-color: #f2f2f7;
+    --text-color: #000000;
+    --text-secondary: #6c6c70;
+    --card-bg: rgba(255, 255, 255, 0.82);
+    --input-bg: rgba(235, 235, 240, 0.9);
+    --option-bg: #ffffff;
+    --border-color: rgba(60, 60, 67, 0.18);
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --blur-strength: 20px;
+}
+
+body.dark {
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --text-secondary: #98989d;
+    --card-bg: rgba(28, 28, 30, 0.85);
+    --input-bg: rgba(44, 44, 46, 0.9);
+    --option-bg: #1c1c1e; /* สี background ของ <option> ใน Dark Mode */
+    --border-color: rgba(84, 84, 88, 0.4);
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Accent Colors */
+body.accent-blue { --accent: #007aff; --accent-hover: #0056b3; }
+body.accent-purple { --accent: #af52de; --accent-hover: #7b2cb1; }
+body.accent-green { --accent: #34c759; --accent-hover: #248a3d; }
+body.accent-orange { --accent: #ff9500; --accent-hover: #cc7600; }
+body.accent-red { --accent: #ff3b30; --accent-hover: #b3241c; }
+
+/* ==========================================================================
+   RESET & BASE STYLES
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+    overflow-x: hidden;
+}
+
+main {
+    width: 100%;
+    max-width: 600px;
+    z-index: 2;
+}
+
+/* Canvas Background & Scroll Blur Effect */
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+    will-change: filter;
+    transition: filter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#bgCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.background.scroll-blur {
+    filter: blur(10px) brightness(0.9);
+}
+
+/* ==========================================================================
+   HEADER & GLASS CARDS
+   ========================================================================== */
+.app-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.app-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--accent);
+}
+.app-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.dashboard-section, .creator-section, .filter-section, .stat-card, .task {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(var(--blur-strength));
+    -webkit-backdrop-filter: blur(var(--blur-strength));
+}
+
+.dashboard-section h2, .creator-section h2 {
+    font-size: 1.15rem;
+    margin-bottom: 0.9rem;
+    font-weight: 700;
+}
+
+/* Dashboard Statistics Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.stat-card {
+    padding: 0.85rem 0.2rem;
+    text-align: center;
+    margin-bottom: 0;
+}
+.stat-card h3 { font-size: 1.35rem; color: var(--accent); }
+.stat-card p { font-size: 0.72rem; color: var(--text-secondary); font-weight: 600; }
+.stat-card.todo h3 { color: #ff9500; }
+.stat-card.doing h3 { color: #007aff; }
+.stat-card.done h3 { color: #34c759; }
+
+.dashboard-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    font-size: 0.82rem;
+}
+.detail-box {
+    background: rgba(120, 120, 128, 0.08);
+    padding: 0.75rem;
+    border-radius: 12px;
+    max-height: 130px;
+    overflow-y: auto;
+}
+.detail-box h4 { margin-bottom: 0.4rem; font-size: 0.85rem; }
+.detail-box ul { list-style: none; }
+.detail-box li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid rgba(120, 120, 128, 0.12);
+}
+.urgent-box li { color: #ff3b30; font-weight: 500; }
+
+/* ==========================================================================
+   INPUTS & DROPDOWNS (แก้ไขปัญหา Dropdown สีขาวใน Dark Theme)
+   ========================================================================== */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+.form-group.row { flex-direction: row; }
+.input-sub, .filter-item { flex: 1; display: flex; flex-direction: column; gap: 0.25rem; }
+.input-sub label, .filter-item label { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }
+.required { color: #ff3b30; }
+
+/* Styling สำหรับ input และ select ให้เข้ากับ Theme */
+input[type="text"], input[type="date"], select {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: 11px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-size: 0.9rem;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* กำหนดสีของ <option> ใน Dropdown เพื่อไม่ให้กลืนใน Dark Mode */
+select option {
+    background-color: var(--option-bg);
+    color: var(--text-color);
+}
+
+input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+/* ==========================================================================
+   BUTTONS & INTERACTIONS
+   ========================================================================== */
+button {
+    cursor: pointer;
+    font-weight: 600;
+    border: none;
+    outline: none;
+    /* iOS Feedback: Scale down เมื่อกดคลิก */
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease, background 0.25s ease;
+}
+button:active {
+    transform: scale(0.95);
+    opacity: 0.85;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 0.95rem;
+    border-radius: 12px;
+}
+
+.btn-secondary {
+    background: rgba(120, 120, 128, 0.18);
+    color: var(--text-color);
+    padding: 0.75rem;
+    border-radius: 12px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-top: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Segmented Control สไตล์ iOS */
+.segment-control {
+    display: flex;
+    background: rgba(120, 120, 128, 0.14);
+    padding: 3px;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+}
+.segment-btn {
+    flex: 1;
+    padding: 0.45rem 0;
+    font-size: 0.82rem;
+    background: transparent;
+    color: var(--text-color);
+    border-radius: 8px;
+}
+.segment-btn.active {
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    color: #000000;
+}
+body.dark .segment-btn.active {
+    background: #3a3a3c;
+    color: #ffffff;
+}
+
+.bulk-action-area { text-align: right; }
+.danger-btn {
+    background: transparent;
+    color: #ff3b30;
+    font-size: 0.82rem;
+    padding: 0.3rem 0.5rem;
+}
+
+/* ==========================================================================
+   TASK CARDS & iOS ANIMATIONS (เพิ่ม Blur และ Slide/Fade ตอนลบและสร้าง)
+   ========================================================================== */
+.task {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 5px solid var(--accent);
+    margin-bottom: 0.75rem;
+    will-change: transform, opacity, max-height, filter;
+    transform-origin: center center;
+}
+
+/* อนิเมชันการเด้งโผล่แบบ Spring ตอนสร้างงานใหม่ */
+.task.ios-pop-in {
+    animation: springPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+}
+
+/* อนิเมชันตอนลบงาน (Single Item Delete Animation: Blur + Scale + Fade + Collapse) */
+.task.ios-deleting {
+    opacity: 0 !important;
+    filter: blur(12px) !important;
+    transform: scale(0.8) translateY(-15px) !important;
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    border-left-width: 0 !important;
+    overflow: hidden;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* อนิเมชันการซ่อนการ์ดเมื่อไม่ผ่านตัวกรอง */
+.task.ios-hidden {
+    display: none !important;
+}
+
+@keyframes springPop {
+    0% { opacity: 0; filter: blur(8px); transform: scale(0.8) translateY(20px); max-height: 0; }
+    70% { transform: scale(1.02) translateY(-2px); }
+    100% { opacity: 1; filter: blur(0); transform: scale(1) translateY(0); max-height: 200px; }
+}
+
+/* สีขอบการ์ดตามสถานะ */
+.task.status-todo { border-left-color: #ff9500; }
+.task.status-doing { border-left-color: #007aff; }
+.task.status-done { border-left-color: #34c759; opacity: 0.65; }
+.task.status-done .t-title { text-decoration: line-through; opacity: 0.7; }
+
+.task-info-side h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.2rem; }
+.task-info-side p { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.2rem; }
+.status-badge, .priority-badge {
+    display: inline-block;
+    padding: 0.12rem 0.45rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-right: 0.3rem;
+}
+.badge-low { background: rgba(52, 199, 89, 0.15); color: #34c759; }
+.badge-medium { background: rgba(255, 149, 0, 0.15); color: #ff9500; }
+.badge-high { background: rgba(255, 59, 48, 0.15); color: #ff3b30; }
+
+.task-actions-side { display: flex; gap: 0.4rem; }
+.task-actions-side button {
+    background: rgba(120, 120, 128, 0.12);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   SETTINGS SIDEBAR & MODAL
+   ========================================================================== */
+.floating-settings {
+    position: fixed; top: 1.25rem; right: 1.25rem;
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    box-shadow: var(--shadow); z-index: 10; font-size: 1.1rem;
+    display: flex; justify-content: center; align-items: center;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+
+#settingsPanel {
+    position: fixed; top: 0; right: 0; width: 280px; height: 100%;
+    background: var(--card-bg); border-left: 1px solid var(--border-color);
+    padding: 1.8rem 1.25rem; box-shadow: var(--shadow); z-index: 100;
+    backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+    transform: translateX(105%); opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+#settingsPanel.show { transform: translateX(0); opacity: 1; }
+.settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+#closeSettings { background: rgba(120,120,128,0.2); border-radius: 50%; width: 28px; height: 28px; color: var(--text-color); }
+.setting-item { margin-bottom: 1.2rem; }
+.setting-item label { display: block; margin-bottom: 0.35rem; font-size: 0.82rem; font-weight: 600; }
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); z-index: 200;
+    display: none; justify-content: center; align-items: center;
+    opacity: 0; transition: opacity 0.3s ease;
+}
+.modal-overlay.show { display: flex; opacity: 1; }
+.modal-card {
+    background: var(--card-bg); padding: 1.5rem; border-radius: 20px;
+    width: 90%; max-width: 420px; box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transform: scale(0.85) translateY(25px);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-overlay.show .modal-card { transform: scale(1) translateY(0); }
+.modal-card h3 { margin-bottom: 1rem; text-align: center; }
+.modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+
+.toast {
+    position: fixed; bottom: 2rem; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(30, 30, 30, 0.9); backdrop-filter: blur(10px);
+    color: #ffffff; padding: 0.6rem 1.4rem; border-radius: 20px;
+    opacity: 0; pointer-events: none; z-index: 1000; font-weight: 600; font-size: 0.88rem;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
