@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow SPA - ระบบจัดการงานสไตล์ iOS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="accent-blue">
+
+    <div class="background" id="bgWrapper">
+        <canvas id="bgCanvas"></canvas>
+    </div>
+
+    <button id="settingsBtn" class="floating-settings" aria-label="ตั้งค่าระบบ">⚙️</button>
+
+    <aside id="settingsPanel">
+        <div class="settings-header">
+            <h2>ตั้งค่าระบบ</h2>
+            <button id="closeSettings">✕</button>
+        </div>
+        <div class="setting-item">
+            <label for="themeSelect">โหมดการแสดงผล</label>
+            <select id="themeSelect">
+                <option value="light">☀️ โหมดสว่าง (Light)</option>
+                <option value="dark">🌙 โหมดมืด (Dark)</option>
+            </select>
+        </div>
+        <div class="setting-item">
+            <label for="accentSelect">สีเน้นย้ำ (Accent Color)</label>
+            <select id="accentSelect">
+                <option value="blue" selected>ฟ้า (Blue)</option>
+                <option value="purple">ม่วง (Purple)</option>
+                <option value="green">เขียว (Green)</option>
+                <option value="orange">ส้ม (Orange)</option>
+                <option value="red">แดง (Red)</option>
+            </select>
+        </div>
+    </aside>
+
+    <main>
+        <header class="app-header">
+            <h1>TaskFlow</h1>
+            <p>ระบบจัดการการบ้านและภาระงานประจำวัน (Single Page SPA)</p>
+        </header>
+
+        <section class="dashboard-section">
+            <h2>📊 รายงานสถานะงาน (Dashboard)</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="statTotal">0</h3>
+                    <p>งานทั้งหมด</p>
+                </div>
+                <div class="stat-card todo">
+                    <h3 id="statTodo">0</h3>
+                    <p>ยังไม่ทำ</p>
+                </div>
+                <div class="stat-card doing">
+                    <h3 id="statDoing">0</h3>
+                    <p>กำลังทำ</p>
+                </div>
+                <div class="stat-card done">
+                    <h3 id="statDone">0</h3>
+                    <p>เสร็จแล้ว</p>
+                </div>
+            </div>
+            
+            <div class="dashboard-details">
+                <div class="detail-box">
+                    <h4>📚 จำนวนงานแยกตามวิชา</h4>
+                    <ul id="subjectBreakdown"></ul>
+                </div>
+                <div class="detail-box urgent-box">
+                    <h4>🚨 งานเร่งด่วน (ส่งภายใน 3 วัน)</h4>
+                    <ul id="urgentTasksList"></ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="creator-section">
+            <h2>➕ เพิ่มรายการงานใหม่</h2>
+            <div class="form-group row">
+                <div class="input-sub">
+                    <label for="taskTitle">ชื่องาน <span class="required">*</span></label>
+                    <input id="taskTitle" type="text" placeholder="เช่น รายงานวิทยาการคำนวณ">
+                </div>
+                <div class="input-sub">
+                    <label for="taskSubject">รายวิชา</label>
+                    <input id="taskSubject" type="text" placeholder="เช่น ว31104 / ภาษาไทย">
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="input-sub">
+                    <label for="dueDate">📅 วันครบกำหนดส่ง</label>
+                    <input id="dueDate" type="date">
+                </div>
+                <div class="input-sub">
+                    <label for="initialStatus">📌 สถานะงานเริ่มแรก</label>
+                    <select id="initialStatus">
+                        <option value="todo">ยังไม่ทำ</option>
+                        <option value="doing">กำลังทำ</option>
+                        <option value="done">เสร็จแล้ว</option>
+                    </select>
+                </div>
+                <div class="input-sub">
+                    <label for="priority">⚠️ ระดับความสำคัญ</label>
+                    <select id="priority">
+                        <option value="low">🟢 ต่ำ (Low)</option>
+                        <option value="medium" selected>🟡 ปานกลาง (Medium)</option>
+                        <option value="high">🟠 สูง (High)</option>
+                    </select>
+                </div>
+            </div>
+            <button id="addTaskBtn" class="btn-primary">เพิ่มรายการงาน</button>
+        </section>
+
+        <section class="filter-section">
+            <div class="search-wrapper">
+                <input id="searchInput" type="text" placeholder="🔍 ค้นหาตามชื่องาน...">
+            </div>
+            <div class="filter-grid">
+                <div class="filter-item">
+                    <label for="filterSubject">กรองตามรายวิชา</label>
+                    <select id="filterSubject">
+                        <option value="all">📚 ทุกรายวิชา</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="filterPriority">กรองตามระดับความสำคัญ</label>
+                    <select id="filterPriority">
+                        <option value="all">⚠️ ทุกระดับความสำคัญ</option>
+                        <option value="low">🟢 ต่ำ</option>
+                        <option value="medium">🟡 ปานกลาง</option>
+                        <option value="high">🟠 สูง</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="segment-control">
+                <button class="segment-btn active" data-filter="all">ทั้งหมด</button>
+                <button class="segment-btn" data-filter="todo">ยังไม่ทำ</button>
+                <button class="segment-btn" data-filter="doing">กำลังทำ</button>
+                <button class="segment-btn" data-filter="done">เสร็จแล้ว</button>
+            </div>
+
+            <div class="bulk-action-area">
+                <button id="clearDoneBtn" class="danger-btn">🗑️ ลบงานที่เสร็จแล้วทั้งหมด</button>
+            </div>
+        </section>
+
+        <section id="taskList" class="task-list-container"></section>
+    </main>
+
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-card">
+            <h3>✏️ แก้ไขข้อมูลรายการงาน</h3>
+            <div class="form-group">
+                <label for="editTitle">ชื่องาน</label>
+                <input id="editTitle" type="text">
+            </div>
+            <div class="form-group">
+                <label for="editSubject">รายวิชา</label>
+                <input id="editSubject" type="text">
+            </div>
+            <div class="form-group row">
+                <div class="input-sub">
+                    <label for="editDate">📅 วันส่งงาน</label>
+                    <input id="editDate" type="date">
+                </div>
+                <div class="input-sub">
+                    <label for="editStatus">📌 สถานะงาน</label>
+                    <select id="editStatus">
+                        <option value="todo">ยังไม่ทำ</option>
+                        <option value="doing">กำลังทำ</option>
+                        <option value="done">เสร็จแล้ว</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="editPriority">⚠️ ระดับความสำคัญ</label>
+                <select id="editPriority">
+                    <option value="low">🟢 ต่ำ</option>
+                    <option value="medium">🟡 ปานกลาง</option>
+                    <option value="high">🟠 สูง</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button id="saveEditBtn" class="btn-primary">บันทึกการเปลี่ยนแปลง</button>
+                <button id="cancelEditBtn" class="btn-secondary">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastNotification" class="toast">บันทึกข้อมูลเรียบร้อย!</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
